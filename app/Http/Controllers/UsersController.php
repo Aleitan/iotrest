@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Unique;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class UsersController extends Controller
 {
@@ -19,13 +22,27 @@ class UsersController extends Controller
 
     //crear un usuario
     public function store(Request $request){
-        return User::create($request->all());
+        $this->validate($request, [
+            'username' => 'required|unique:users',
+            'password' => 'required',
+            'rol' => 'required'
+        ]);
+        $user = new User;
+        $user->fill($request->all());
+        $user->password = Hash::make($request->password);
+        $user->save();
+        return $user;
     }
 
     //actualizar un usuario
     public function update(Request $request, $id){
+        $this->validate($request, [
+            'username' => 'filled|unique:users'
+        ]);
         $user = User::find($id);
+        if(!$user) return response('', 404);
         $user->update($request->all());
+        if($request->password) $user->password = Hash::make($request->password);
         $user->save();
         return $user;
     }
@@ -33,6 +50,7 @@ class UsersController extends Controller
     //eliminar un usuario
     public function destroy($id){
         $user = User::find($id);
+        if(!$user) return response('', 404);
         $user->delete();
         return $user;
     }
