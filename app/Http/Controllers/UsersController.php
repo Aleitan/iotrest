@@ -10,48 +10,48 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class UsersController extends Controller
 {
-    //Consultar todos los usuarios
-    public function index(){
+    //consultar todos los usuarios
+    public function index (){
         return User::paginate();
     }
 
     //consultar un usuario
-    public function show($id){
+    public function show ($id){
         return User::find($id);
     }
 
     //crear un usuario
-    public function store(Request $request){
-        $this->validate($request, [
+    public function store (Request $request){
+        $this->validate($request, [ 
             'username' => 'required|unique:users',
             'password' => 'required',
-            'rol' => 'required'
+            'rol' => 'required',
         ]);
         $user = new User;
         $user->fill($request->all());
         $user->password = Hash::make($request->password);
         $user->save();
-        return $user;
+       return $user;
     }
 
     //actualizar un usuario
-    public function update(Request $request, $id){
-        $this->validate($request, [
-            'username' => 'filled|unique:users'
+    public function update (Request $request, $id){
+        $this->validate($request, [ 
+            'username' => 'filled|unique:users',
         ]);
         $user = User::find($id);
-        if(!$user) return response('', 404);
+        if(!$user) return response('',404);
         $user->update($request->all());
         if($request->password) $user->password = Hash::make($request->password);
         $user->save();
         return $user;
-    }
+     }
 
-    //eliminar un usuario
-    public function destroy($id){
+     //eliminar un usuario
+    public function destroy ($id){
         $user = User::find($id);
-        if(!$user) return response('', 404);
+        if(!$user) return response('',404);
         $user->delete();
         return $user;
-    }
+     }
 }
